@@ -30,7 +30,6 @@ export class IsUserAdmin implements CanActivate {
   }
 
   async validateRequest(request) {
-    console.log(request.user);
     const isUserAdmin = await this.adminService.isUserAdmin(
       request?.user?.role,
     );

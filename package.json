@@ -21,8 +21,8 @@
     "test:e2e": "jest --config ./test/jest-e2e.json",
     "typeorm": "ts-node -r tsconfig-paths/register --project tsconfig.build.json ./node_modules/typeorm/cli.js ",
     "typeorm:create": "npm run typeorm migration:create --  -n",
-    "typeorm:migrate": "npm run typeorm migration:generate -- -d src/core/database/dbsource.ts ./src/migrations ",
-    "typeorm:run": "npm run typeorm migration:run -- -d src/core/database/dbsource.ts",
+    "typeorm:migrate": "npm run typeorm migration:generate -- -d src/core/database/dbsource.ts  ",
+    "typeorm:run": "npm run typeorm migration:run -- -d src/core/database/dbsource.ts ",
     "typeorm:revert": "npm run typeorm migration:revert"
   },
   "dependencies": {

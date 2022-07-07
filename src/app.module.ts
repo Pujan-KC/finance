@@ -7,8 +7,10 @@ import { AuthModule } from './auth/auth.module';
 import { ConfigModule } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
 import { TransactionModule } from './transaction/transaction.module';
+
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     JwtModule.register({ secret: process.env.JWTKEY }),
     ConfigModule.forRoot({ isGlobal: true }),
     UsersModule,

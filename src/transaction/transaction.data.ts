@@ -6,7 +6,7 @@ export enum TransactionStatus {
   unsuccess = 'UNSUCCESSFUL',
   failed = 'FAILED',
   rejected = 'REJECTED',
-  insuffficientFund = 'INSUFFICIENT_FUND',
+  inSuffficientFund = 'INSUFFICIENT_FUND',
 }
 
 export class fundTransferDTO {

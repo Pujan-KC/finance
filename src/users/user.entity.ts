@@ -2,14 +2,12 @@ import { GeneralInformation } from '../domain/entities/general.entity';
 import { Column, Entity, Index } from 'typeorm';
 import { IRejectionReason, Otp, UserRole, UserStatus } from './user.data';
 import { Exclude } from 'class-transformer';
+import { Transaction } from 'src/transaction/transaction.entity';
 
 @Entity({ name: 'users' })
 export class User extends GeneralInformation {
   @Column('varchar', { length: 196, nullable: true })
   public name: string;
-
-  @Column('varchar', { unique: true, length: 75, nullable: true })
-  public email: string;
 
   @Index({ unique: true })
   @Column('varchar', { length: 16, unique: true, name: 'account_no' })
@@ -45,12 +43,6 @@ export class User extends GeneralInformation {
   @Column('enum', { enum: UserStatus })
   public status: UserStatus;
 
-  @Column('text', { nullable: true, name: 'avatar' })
-  public avatar: string;
-
   @Column('jsonb', { nullable: true, name: 'rejection_reason', select: false })
   public rejectionReason: IRejectionReason;
-
-  //   @Column('varchar', { length: 200, nullable: true })
-  //   public avatar: string;
 }

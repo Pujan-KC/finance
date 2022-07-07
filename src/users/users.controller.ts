@@ -18,7 +18,7 @@ export class UserController {
     @Body() body: DepositWithdrawDTO,
     @JwtUserDecorator() user,
   ) {
-    return this.userService.deposit(user, body.amount);
+    return this.userService.deposit(user, body);
   }
 
   @UseGuards(AuthGuard('jwt'))
@@ -27,6 +27,12 @@ export class UserController {
     @Body() body: DepositWithdrawDTO,
     @JwtUserDecorator() user,
   ) {
-    return this.userService.withdraw(user, body.amount);
+    return this.userService.withdraw(user, body);
+  }
+
+  @UseGuards(AuthGuard('jwt'))
+  @Post('profile')
+  public async getInfo(@JwtUserDecorator() user: User) {
+    return this.userService.findOneByAccountNo(user.accountNo);
   }
 }

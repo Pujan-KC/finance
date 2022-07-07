@@ -78,6 +78,10 @@ export class DepositWithdrawDTO {
   @ApiProperty({ type: Number })
   @IsNotEmpty()
   readonly amount: number;
+
+  @ApiProperty({ type: String })
+  @IsNotEmpty()
+  readonly remarks: string;
 }
 
 export class UserRegisterPayload {
@@ -92,6 +96,11 @@ export class UserRegisterPayload {
   readonly name: string;
 
   readonly otp: Otp;
+}
+
+export enum TransactionType {
+  deposit = 'DEPOSIT',
+  withdraw = 'WITHDRAW',
 }
 
 export class CreateUserDTO {

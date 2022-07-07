@@ -7,8 +7,16 @@ import {
 } from '@nestjs/common';
 import { RoseBayConsts } from 'src/core/constants';
 import { AccountNoGenerator, otpGenerator } from 'src/core/utils';
+import { TransactionStatus } from 'src/transaction/transaction.data';
 import { Repository, UpdateResult } from 'typeorm';
-import { UserRegisterPayload, UserRole, UserStatus } from './user.data';
+import { DepositWithdraw } from './depositWithdraw.entity';
+import {
+  DepositWithdrawDTO,
+  TransactionType,
+  UserRegisterPayload,
+  UserRole,
+  UserStatus,
+} from './user.data';
 import { User } from './user.entity';
 
 @Injectable()
@@ -16,6 +24,9 @@ export class UserService {
   constructor(
     @Inject('USER_REPOSITORY')
     private readonly userRepository: Repository<User>,
+
+    @Inject('DEPOSIT_WITHDRAQ_REPOSITORY')
+    private readonly depWithRepository: Repository<DepositWithdraw>,
   ) {}
 
   public async create(user: UserRegisterPayload): Promise<User> {
@@ -26,12 +37,33 @@ export class UserService {
     return this.userRepository.save({ ...user, status, role, accountNo });
   }
 
-  public findOneById(id: number): Promise<User> {
-    return this.userRepository.findOne({ where: { id } });
+  public async findOneById(id: number): Promise<User> {
+    const user = await this.userRepository.findOne({ where: { id } });
+    if (!user)
+      throw new HttpException(
+        { error: 'User not found' },
+        HttpStatus.NOT_FOUND,
+      );
+    return user;
+  }
+
+  public findSupeAdmin(): Promise<User> {
+    return this.userRepository.findOne({
+      where: { role: UserRole.super_admin },
+    });
+  }
+
+  public findOneByAccountNo(accountNo: string): Promise<User> {
+    return this.userRepository.findOne({ where: { accountNo } });
   }
 
   public async findOneByContact(contact: string) {
     return this.userRepository.findOne({ where: { contact } });
+  }
+
+  public async findManyUsers(page = 1, take = 10) {
+    const skip = (page - 1) * take;
+    return this.userRepository.findAndCount({ skip, take });
   }
 
   public async findOneByContactWithPassword(contact: string) {
@@ -79,6 +111,8 @@ export class UserService {
     return this.userRepository.save(user);
   }
 
+  public updateUsers(data: User[]) {}
+
   public async deleteUser(id: number): Promise<UpdateResult> {
     const savedUser = await this.userRepository.findOne({ where: { id } });
     if (!savedUser)
@@ -89,7 +123,8 @@ export class UserService {
     return this.userRepository.softDelete(savedUser.id);
   }
 
-  public async deposit(user: User, amount: number) {
+  public async deposit(user: User, payload: DepositWithdrawDTO) {
+    const { amount, remarks } = payload;
     const savedUser = await this.userRepository.findOne({
       where: { id: user.id },
     });
@@ -101,14 +136,23 @@ export class UserService {
         HttpStatus.BAD_REQUEST,
       );
     const newBalance = amount + balance;
-    console.log(newBalance);
     savedUser.balance = newBalance;
-    return this.update(savedUser);
+    const data = await this.depWithRepository.save({
+      amount,
+      user: savedUser,
+      remarks,
+      action: TransactionType.deposit,
+      status: TransactionStatus.success,
+    });
+
+    await this.update(savedUser);
+    return data;
   }
 
-  public async withdraw(user: User, amount: number) {
+  public async withdraw(JWTuser: User, payload: DepositWithdrawDTO) {
+    const { amount, remarks } = payload;
     const savedUser = await this.userRepository.findOne({
-      where: { id: user.id },
+      where: { id: JWTuser.id },
     });
 
     const { balance, status } = savedUser;
@@ -124,6 +168,13 @@ export class UserService {
       );
     const newBalance = balance - amount;
     savedUser.balance = newBalance;
-    return this.update(savedUser);
+    const data = await this.depWithRepository.save({
+      amount,
+      remarks,
+      action: TransactionType.withdraw,
+      status: TransactionStatus.success,
+      user: savedUser,
+    });
+    return this.depWithRepository.save(data);
   }
 }

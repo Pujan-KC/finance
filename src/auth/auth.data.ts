@@ -4,14 +4,13 @@ import {
   MinLength,
   IsString,
   Length,
-  IsEmail,
+  IsNumberString,
 } from 'class-validator';
 
 export class UserLoginDTO {
   @ApiProperty()
   @MinLength(10)
   @IsNotEmpty()
-  // @IsMobileNumber()
   readonly contact: string;
 
   @ApiProperty()
@@ -62,4 +61,14 @@ export class ChangePasswordDTO {
   @IsNotEmpty()
   @IsString()
   readonly confirmPassword: string;
+}
+
+export class PaginationParams {
+  @ApiProperty({ default: 1 })
+  @IsNumberString()
+  public page: number;
+
+  @ApiProperty({ default: 10 })
+  @IsNumberString()
+  public take: number;
 }
